@@ -56,6 +56,7 @@ class Bank:
                     print("Incorrect phone number or password.")
         except FileNotFoundError:
             print("Account not found!")
+    
     def add_cash(self, amount):
         if amount > 0:
             self.cash += amount
@@ -65,45 +66,31 @@ class Bank:
         else:
             print("Enter a valid amount!")
             
-   ''' def add_cash(self, amount):
-        if amount > 0:
-            self.cash += amount
-            with open(f"{name}.txt","r") as f:
-                details = f.read()
-                self.client_details_list = details.split("\n")
-            
-            with open(f"{name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[3]),str(self.cash)))
+    def tranfer_cash(self, amount, recipent_name, recipent_ph):
+        if amount > self.cash or amount <= 0:
+            print("Invalid transfer amount.")
+            return
+        try: 
+            with open(f"{recipent_name}.txt", "r") as f:
+                details = f.read().spilt("\n")
+                if str(recipent_ph) == details[1]:
+                    recipent_cash = int(details[3])
+                    recipent_cash += amount
 
-            print("Amount added successfully.")
+                    with open(f"{recipent_name}.txt", "w") as f:
+                        details[3] = str(recipent_cash)
+                        f.write("\n".join(details))
 
-        else:
-            print("Enter correct value of amount!")'''
+                        self.cash -= amount
+                        self.update_file_balance()
 
-    def tranfer_cash(self, amount , name ,ph):
-        with open(f"{name}.txt","r") as f:
-            details = f.read()
-            self.client_details_list = details.split("\n")
-            if str(ph) in self.client_details_list:
-                self.TranferCash = True
+                        self.log_transaction(f"Transferred {amount} to {recipient_name}. New balance: {self.cash}")
+                        print(f"Transferred {amount} to {recipient_name}. New balance: {self.cash}")
+                else:
+                        print("Recipent details are incorrect.")
+        except FileNotFoundError:
+            print("Recipent account not found.")
 
-        
-        if self.TranferCash == True:
-            total_cash = int(self.client_details_list[3]) + amount
-            left_cash = self.cash - amount
-            with open(f"{name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[3]),str(total_cash)))
-
-            with open(f"{self.name}.txt","r") as f:
-                details_2 = f.read()
-                self.client_details_list = details.split("\n")
-            
-            with open(f"{self.name}.txt","w") as f:
-                f.write(details_2.replace(str(self.client_details_list[3]),str(left_cash)))
-
-            print("Amount Transfered Successfully to",name,"-",ph)
-            print("Balacne left =",left_cash)
-    
     def password_change(self, password):
         if len(password) < 5 or len(password) > 18:
             print("Enter password greater than 5 and less than 18 character")
@@ -115,120 +102,114 @@ class Bank:
             with open(f"{self.name}.txt","w") as f:
                 f.write(details.replace(str(self.client_details_list[2]),str(password)))
             print("New Password set up successfully")
+    
+    def update_file_balance(self):
+        with open(f"{self.name}.txt", "r") as f:
+            details = f.read().split("\n")
+        details[3] = str(self.cash)
+        with open(f"{self.name}.txt", "w") as f:
+            f.write("\n".join(details))       
         
-    def ph_change(self , ph):
-        if len(str(ph)) > 10 or len(str(ph)) < 10:
-            print("Invalid Phone number ! please enter 10 digit number")
+    def log_transaction(self, message):
+        with open(f"{self.name}_transaction.txt", "a") as f:
+            f.write(f"{message}\n")
+
+    def view_transaction_history(self):
+        try:
+            with open(f"{self.name}_transaction.txt", "r") as f:
+                history = f.read()
+                print(history)
+        except FileNotFoundError:
+            print("Transaction history not found.")
+
+    def password_change(self, new_password):
+        if len(new_password) < 5 or len(new_password) > 18:
+            print("Password must be between 5 and 18 characters.")
         else:
             with open(f"{self.name}.txt","r") as f:
-                details = f.read()
-                self.client_details_list = details.split("\n")
-
+                details = f.read().split("\n")
+            hashed_password = self.hash_password(new_password)
+            details[2] = hashed_password
             with open(f"{self.name}.txt","w") as f:
-                f.write(details.replace(str(self.client_details_list[1]),str(ph)))
-            print("New Phone number set up successfully")
+                f.write("\n".join(details))
+            print("Password changed successfully")
+            self.log_transaction("password changed.")
+
+
+    def ph_change(self ,new_ph):
+        if not self.validate_phone(new_ph):
+            print("Invalid Phone number! Please enter a valid 10-digit number.")
+        else:
+            with open(f"{self.name}.txt", "r") as f:
+                details = f.read().split("\n")
+            details[1] = str(new_ph)
+            with open(f"{self.name}.txt", "w") as f:
+                f.write("\n".join(details))
+            print("Phone number changed successfully.")
+            self.log_transaction("Phone number changed.")
 
 
 
 if __name__ == "__main__":
-    Bank_object = Bank()
+    bank = Bank()
     print("\t\t\tWelcome to our Bank!!")
-    print("1.Login.")
-    print("2.Create a new Account.")
-    user = int(input("Make decision: "))
+    print("1. Login.")
+    print("2. Create a new Account.")
+    
+    user_choice = int(input("Make your choice: "))
 
-    if user == 1:
-        print("Logging in")
+    if user_choice == 1:
         name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.login(name, ph, password)
-        while True:
-            if Bank_object.loggedin:
-                print("1.Add amount")
-                print("2.Check Balance")
-                print("3.Tranfer amount")
-                print("4.Edit profile")
-                print("5.Logout")
-                login_user = int(input())
-                if login_user == 1:
-                    print("Balance =",Bank_object.cash)
-                    amount = int(input("Enter amount: "))
-                    Bank_object.add_cash(amount)
-                    print("\n1.Back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
+        ph = input("Enter Phone Number: ")
+        password = input("Enter Password: ")
+        bank.login(name, ph, password)
+        if bank.loggedin:
+            while True:
+                print("\n1. Add Amount")
+                print("2. Check Balance")
+                print("3. Transfer Amount")
+                print("4. View Transaction History")
+                print("5. Edit Profile")
+                print("6. Logout")
                 
-                elif login_user == 2:
-                    print("Balacne =",Bank_object.cash)
-                    print("\n1.Back menu")
-                    print("2.Logout")
-                    choose = int(input())
-                    if choose == 1:
-                        continue
-                    elif choose == 2:
-                        break
+                choice = int(input("Choose an option: "))
+                if choice == 1:
+                    print(f"Current Balance: {bank.cash}")
+                    amount = int(input("Enter amount to add: "))
+                    bank.add_cash(amount)
 
-                elif login_user == 3:
-                    print("Balance =",Bank_object.cash)
-                    amount = int(input("Enter amount: "))
-                    if amount >= 0 and amount <= Bank_object.cash:
-                        name = input("Enter person name: ")
-                        ph = input("Enter person phone number: ")
-                        Bank_object.Tranfer_cash(amount,name,ph)
-                        print("\n1.Back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
-                    elif amount < 0 :
-                        print("Please Enter correct value of amount")
+                elif choice == 2:
+                    print(f"Balance: {bank.cash}")
 
-                    elif amount > Bank_object.cash:
-                        print("Not enough balance")
+                elif choice == 3:
+                    recipient_name = input("Enter recipient's name: ")
+                    recipient_ph = input("Enter recipient's phone number: ")
+                    amount = int(input("Enter amount to transfer: "))
+                    bank.transfer_cash(amount, recipient_name, recipient_ph)
 
-                elif login_user == 4:
-                    print("1.Password change")
-                    print("2.Phone Number change")
-                    edit_profile = int(input())
-                    if edit_profile == 1:
-                        new_passwrod = input("Enter new Password: ")
-                        Bank_object.password_change(new_passwrod)
-                        print("\n1.Back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
-                    elif edit_profile == 2:
-                        new_ph = int(input("Enter new Phone Number: "))
-                        Bank_object.ph_change(new_ph)
-                        print("\n1.Back menu")
-                        print("2.Logout")
-                        choose = int(input())
-                        if choose == 1:
-                            continue
-                        elif choose == 2:
-                            break
+                elif choice == 4:
+                    bank.view_transaction_history()
 
-                elif login_user == 5:
+                elif choice == 5:
+                    print("1. Change Password")
+                    print("2. Change Phone Number")
+                    edit_choice = int(input())
+                    if edit_choice == 1:
+                        new_password = input("Enter new password: ")
+                        bank.password_change(new_password)
+                    elif edit_choice == 2:
+                        new_ph = input("Enter new phone number: ")
+                        bank.ph_change(new_ph)
+
+                elif choice == 6:
+                    print("Logged out.")
                     break
-                        
-                
-    if user == 2:
-        print("Creating a new  Account")
-        name = input("Enter Name: ")
-        ph = int(input("Enter Phone Number: "))
-        password = input("Enter password: ")
-        Bank_object.register(name, ph, password)
 
+    elif user_choice == 2:
+        name = input("Enter Name: ")
+        ph = input("Enter Phone Number: ")
+        password = input("Enter Password: ")
+        bank.register(name, ph, password)
 
 #changes to make in the code: 
 # Fix method naming
