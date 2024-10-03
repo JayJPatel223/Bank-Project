@@ -39,21 +39,23 @@ class Bank:
             with open(f"{name}_transactions.txt", "w") as f:
                 f.write("Transaction History\n")
 
-    def login(self, name , ph , password):
-        with open(f"{name}.txt","r") as f:
-            details = f.read()
-            self.client_details_list = details.split("\n")
-            if str(ph) in str(self.client_details_list):
-                if str(password) in str(self.client_details_list):
-                    self.loggedin = True
+    def login(self, name, ph, password):
+        try:
+            with open(f"{name}.txt", "r") as f:
+                details = f.read().split("\n")
+                self.client_details_list = details
+                stored_password_hash = details[2]
+                password_hash = self.hash_password(password)
 
-            if self.loggedin == True:
-                print(f"{name} logged in")
-                self.cash = int(self.client_details_list[3])
-                self.name = name
-            
-            else:
-                print("Wrong details!")
+                if str(ph) == details[1] and password_hash == stored_password_hash:
+                    self.loggedin = True
+                    self.cash = int(details[3])
+                    self.name = name
+                    print(f"{name} logged in successfully!")
+                else:
+                    print("Incorrect phone number or password.")
+        except FileNotFoundError:
+            print("Account not found!")
     
     def add_cash(self, amount):
         if amount > 0:
