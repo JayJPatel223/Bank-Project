@@ -1,5 +1,4 @@
 class Bank:
-    print("Hello world!")
     def __init__(self):
         self.client_details_list = []
         self.loggedin = False
