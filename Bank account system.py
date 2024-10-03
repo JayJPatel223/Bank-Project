@@ -56,8 +56,16 @@ class Bank:
                     print("Incorrect phone number or password.")
         except FileNotFoundError:
             print("Account not found!")
-    
     def add_cash(self, amount):
+        if amount > 0:
+            self.cash += amount
+            self.update_file_balance()
+            self.log_transaction(f"Added {amount}. New Balnace: {self.cash}")
+            print("Amount added succesfully.")
+        else:
+            print("Enter a valid amount!")
+            
+   ''' def add_cash(self, amount):
         if amount > 0:
             self.cash += amount
             with open(f"{name}.txt","r") as f:
@@ -70,7 +78,7 @@ class Bank:
             print("Amount added successfully.")
 
         else:
-            print("Enter correct value of amount!")
+            print("Enter correct value of amount!")'''
 
     def tranfer_cash(self, amount , name ,ph):
         with open(f"{name}.txt","r") as f:
