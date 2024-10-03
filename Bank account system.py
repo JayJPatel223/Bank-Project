@@ -212,9 +212,9 @@ if __name__ == "__main__":
         bank.register(name, ph, password)
 
 #changes to make in the code: 
-# Fix method naming
-# Better error handling
-# Input validations for phone numbers and amount, etc.
-# Password hashing using hashlib
-# Consolidate read/write file operations
-# add transaction history
+# Fix method naming (done)
+# Better error handling (done)
+# Input validations for phone numbers and amount, etc. (done)
+# Password hashing using hashlib (done)
+# Consolidate read/write file operations (done)
+# add transaction history (done)
