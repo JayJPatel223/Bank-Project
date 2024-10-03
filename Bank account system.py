@@ -203,3 +203,12 @@ if __name__ == "__main__":
         ph = int(input("Enter Phone Number: "))
         password = input("Enter password: ")
         Bank_object.register(name, ph, password)
+
+
+#changes to make in the code: 
+# Fix method naming
+# Better error handling
+# Input validations for phone numbers and amount, etc.
+# Password hashing using hashlib
+# Consolidate read/write file operations
+# add transaction history
